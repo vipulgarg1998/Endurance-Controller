@@ -1,0 +1,21 @@
+body_mass = 50;
+body_volume = 0.5;
+Drag_Coefficient = 0.01;
+Reference_Area = 10;
+desired_depth = 100;
+no_of_steps = 100;
+initinal_velocity = 0.1 ;
+no_of_observations = 20 ;
+g = 9.8 ;
+Thruster_data = xlsread('T100_T_P_C.xlsx') ;
+%%%%%%%%%%%%%%%%%%%%%
+G = body_mass*g ;
+%%%%%%%%%%%%%%%%%%%%%
+for vel = initinal_velocity:0.1:2
+    for dep = linspace(desired_depth/no_of_steps,desired_depth,no_of_steps)
+        
+        
+    end
+    
+    
+end
