@@ -8,6 +8,7 @@ maxXprop = 23.14369 ; % in Newtons
 minXprop = -18.1423 ; % in Newtons
 
 % for x 
+Xu = -13.5 ;
 Xu_dot = -9.30e-001 ;
 Xuu = -1.62e+000 ;
 Xvr = +3.55e+001 ;
@@ -45,7 +46,8 @@ h3 = animatedline(ax3) ;
 % for simulation
 dt = 0.001 ;
 flag = 1 ;
-data = [] ;
+inputs = [] ;
+outputs = [] ;
 % initial conditions
 u = 0 ; v = 0; r = 0; psi = 0 ; Xprop = 0 ; % ud = 0.5 ; 
 % Controller Params
@@ -62,11 +64,13 @@ for i =0:dt:100
    % A*mat = X
    A = [ m-Xu_dot ,0,0 ; 0, m-Yv_dot , m*Xcg-Yr_dot ; 0, m*Xcg-Nv_dot, Iz-Nr_dot]; 
    X = [ 
-       (W-B)*cos(psi) + Xuu*u*u + (Xvr+m)*v*r + (Xrr+m*Xcg)*r*r + Xprop 
+       (W-B)*cos(psi) + Xu*u + (Xvr+m)*v*r + (Xrr+m*Xcg)*r*r + Xprop 
        -(W-B)*sin(psi) + Yvv*v*v + Yrr*r*r + (Yur-m)*u*r + Yuv*u*v 
        -Xcg*W*sin(psi) + Nvv*v*v + Nrr*r*r + (Nur-m*Xcg)*u*r + Nuv*u*v 
        ] ;
    mat = A\X ;
+   drag = Xu*u ;
+   force = mat(1) ;
    u = u + mat(1)*dt ;%+ 0.001*rand();
    v = v + mat(2)*dt ;
    r = r + mat(3)*dt ;
@@ -81,25 +85,19 @@ for i =0:dt:100
    elseif Xprop < minXprop 
        Xprop = minXprop ;
    end
-   force = mat(1) - Xprop - (W-B) ;
-   data(flag,:) = [u, force, i] ;
-   addpoints(h1,i, u) ;
+   inputs(flag,:) = [u, drag, W-B] ;
+   outputs(flag,:) = [X(1), force] ;
+   addpoints(h1,i, u) ; 
    addpoints(h2,i,Xprop) ;
   % addpoints(h3,i,r) ;
   flag = flag + 1 ;
 end
-u_data = data(:,1) ;
-x_data = data(:,2) ;
-t_data = data(:,3) ;
-net = newfit(u_data', x_data', [5 5 5]);
+net = newfit(inputs', outputs', [5 5 5]);
 net.performFcn = 'mae';
 net.trainFcn = 'trainlm' ;
-net = train(net, u_data', x_data') ;
-output = net(u_data') ;
-perf = perform(net,output,x_data') ;
-plot(u_data, x_data, 'r') ;
-hold on ;
-plot(u_data, output', 'b') ;
+net = train(net, inputs', outputs') ;
+output = net(inputs') ;
+perf = perform(net,output,outputs') ;
 %{
 [~, ind] = unique(u_data, 'rows');
 % duplicate indices
