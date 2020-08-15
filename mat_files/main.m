@@ -10,6 +10,10 @@ dives_left = dives_req ;    % dives left
 [min_velocity, min_energy, index, velocity_of_dives, energy_of_dives, load] = compute_power() ;
 energy_of_dives = energy_of_dives + load;
 
+%%%%%%%%%%%%%%%%%%%% Simulate REMUS                     
+net = Remus_model(min_velocity) ;
+[min_velocity, min_energy, index, velocity_of_dives, energy_of_dives, load] = compute_power_NN(net) ;
+
 %%%%%%%%%%%%%%%%%%%% Initialisation %%%%%%%%%%%%%%%%%%%%%
 vel = zeros(dives_req,1) ;
 ener = zeros(dives_req,1) ;
